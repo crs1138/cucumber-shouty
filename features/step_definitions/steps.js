@@ -1,24 +1,22 @@
-const { Given, When, Then } = require( '@cucumber/cucumber' );
-const { assertThat, hasItem } = require('hamjest');
-const Person = require( '../../src/shouty' );
+const { Given, When, Then, Before } = require('@cucumber/cucumber')
+const { assertThat, is } = require('hamjest')
 
-Given('{person} is located {int} meter(s) from Sean', function (lucy, distance) {
-    // Given('Lucy is located {float} meters from Sean', function (float) {
-    // Write code here that turns the phrase above into concrete actions
+const { Person, Network } = require('../../src/shouty')
 
-    this.lucy = new Person;
-    this.sean = new Person;
-    this.lucy.moveTo(distance);
-});
+Before(function () {
+  this.network = new Network()
+  this.people = {}
+})
+
+Given('a person named {word}', function (name) {
+  this.people[name] = new Person(this.network)
+})
 
 When('Sean shouts {string}', function (message) {
-    // Write code here that turns the phrase above into concrete actions
-    this.sean.shout( message );
-    this.message = message;
-});
+  this.people['Sean'].shout(message)
+  this.messageFromSean = message
+})
 
-Then('{person} hears {person}\'s message', function (lucy, sean) {
-    this.lucy.hearMessage( this.message );
-    console.log( this.lucy.messagesHeard() )
-    assertThat( this.lucy.messagesHeard(), hasItem( this.message ));
-});
+Then('Lucy should hear Sean\'s message', function () {
+  assertThat(this.people['Lucy'].messagesHeard(), is([this.messageFromSean]))
+})
